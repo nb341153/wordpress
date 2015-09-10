@@ -65,9 +65,6 @@
                                                 
            			</div><!-- EOF horizontal-menu-wrap -->                       
             
-            <div id="designer">               
-                <?php printf( __( 'Theme by %s', 'tesseract' ), '<a href="http://tyler.com">Tyler Moore</a>' ); ?>
-            </div>            
             
       	</div>                  
         
