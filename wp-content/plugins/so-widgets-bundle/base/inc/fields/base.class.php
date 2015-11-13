@@ -101,6 +101,26 @@ abstract class SiteOrigin_Widget_Field_Base {
 	 * @var string
 	 */
 	protected $sanitize;
+	/**
+	 * Reference to the parent widget required for creating child fields.
+	 *
+	 * @access private
+	 * @var SiteOrigin_Widget
+	 */
+	protected $for_widget;
+	/**
+	 * An array of field names of parent containers.
+	 *
+	 * @var array
+	 */
+	protected $parent_container;
+	/**
+	 * Whether or not this field contains other fields.
+	 *
+	 * @access protected
+	 * @var boolean
+	 */
+	protected $is_container;
 
 
 	/* ============================================================================================================== */
@@ -137,9 +157,12 @@ abstract class SiteOrigin_Widget_Field_Base {
 	 * @param $element_name string The name to be used as the name attribute of the wrapping HTML element.
 	 * @param $field_options array Configuration for the field.
 	 *
+	 * @param SiteOrigin_Widget $for_widget
+	 * @param array $parent_container
+	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function __construct( $base_name, $element_id, $element_name, $field_options ) {
+	public function __construct( $base_name, $element_id, $element_name, $field_options, $for_widget = null, $parent_container = array() ) {
 		if( isset( $field_options['type'] ) ) {
 			$this->type = $field_options['type'];
 		}
@@ -153,15 +176,21 @@ abstract class SiteOrigin_Widget_Field_Base {
 		$this->field_options = $field_options;
 		$this->javascript_variables = array();
 
+		$this->for_widget = $for_widget;
+		$this->parent_container = $parent_container;
+
+		$this->init();
+	}
+
+	private function init() {
+		$this->init_options();
 		$this->initialize();
 	}
 
 	/**
-	 * Initialization function which may be overridden if required, in which case, it is recommended that the parent
-	 * class' function is still called using `parent::initialize();`.
+	 * Initialization function which may be overridden if required.
 	 */
 	protected function initialize() {
-		$this->init_options();
 	}
 
 	/**
@@ -204,7 +233,7 @@ abstract class SiteOrigin_Widget_Field_Base {
 	 *
 	 * @return array The array of label CSS classes.
 	 */
-	protected function get_label_classes() {
+	protected function get_label_classes( $value, $instance ) {
 		return array( 'siteorigin-widget-field-label' );
 	}
 
@@ -272,19 +301,19 @@ abstract class SiteOrigin_Widget_Field_Base {
 	 * @param $instance array The current widget instance.
 	 */
 	protected function render_before_field( $value, $instance ) {
-		$this->render_field_label();
+		$this->render_field_label( $value, $instance );
 	}
 
 	/**
 	 * Default label rendering implementation. Subclasses should override if necessary to render labels differently.
 	 */
-	protected function render_field_label() {
+	protected function render_field_label( $value, $instance ) {
 		?>
-		<label for="<?php echo esc_attr( $this->element_id ) ?>" <?php $this->render_CSS_classes( $this->get_label_classes() ) ?>>
+		<label for="<?php echo esc_attr( $this->element_id ) ?>" <?php $this->render_CSS_classes( $this->get_label_classes( $value, $instance ) ) ?>>
 			<?php
 		echo esc_html( $this->label );
 		if( !empty( $this->optional ) ) {
-			echo '<span class="field-optional">(' . __('Optional', 'siteorigin-panels') . ')</span>';
+			echo '<span class="field-optional">(' . __('Optional', 'so-widgets-bundle') . ')</span>';
 		}
 		?>
 		</label>
